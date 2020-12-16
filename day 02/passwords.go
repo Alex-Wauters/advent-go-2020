@@ -22,14 +22,29 @@ func (p password) isValid() bool {
 	return p.min <= count && count <= p.max
 }
 
+func (p password) isValid2() bool {
+	first, second := string(p.password[p.min-1]) == p.letter, string(p.password[p.max-1]) == p.letter
+	return (first || second) && first != second
+}
+
 func main() {
 	passwords := readInput()
 	fmt.Println(partOne(passwords))
+	fmt.Println(partTwo(passwords))
 }
 
 func partOne(passwords []password) (r int) {
 	for _, p := range passwords {
 		if p.isValid() {
+			r++
+		}
+	}
+	return
+}
+
+func partTwo(passwords []password) (r int) {
+	for _, p := range passwords {
+		if p.isValid2() {
 			r++
 		}
 	}
