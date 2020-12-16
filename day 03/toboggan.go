@@ -18,15 +18,24 @@ func (r row) isTree(i int) bool {
 func main() {
 	rows := readInput()
 	fmt.Println(partOne(rows))
+	fmt.Println(partTwo(rows))
 }
 
-func partOne(rows []row) (r int) {
-	for x, y := 0, 0; y < len(rows); x, y = x+3, y+1 {
+func trees(rows []row, addX, addY int) (r int) {
+	for x, y := 0, 0; y < len(rows); x, y = x+addX, y+addY {
 		if rows[y].isTree(x) {
 			r++
 		}
 	}
 	return
+}
+
+func partOne(rows []row) (r int) {
+	return trees(rows, 3, 1)
+}
+
+func partTwo(rows []row) (r int) {
+	return trees(rows, 1, 1) * trees(rows, 3, 1) * trees(rows, 5, 1) * trees(rows, 7, 1) * trees(rows, 1, 2)
 }
 
 func readInput() (r []row) {
