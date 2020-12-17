@@ -5,10 +5,11 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"regexp"
+	"strconv"
 	"strings"
 )
 
-// byr,iyr,eyr,hgt,hcl,ecl,pid,cid string
 type passport map[string]string
 
 func (p passport) isValid() bool {
@@ -18,15 +19,93 @@ func (p passport) isValid() bool {
 	}
 	return len(p) == 7
 }
+func (p passport) isValid2() bool {
+	return p.isValidYear("byr", 1920, 2002) && p.isValidYear("iyr", 2010, 2020) && p.isValidYear("eyr", 2020, 2030) && p.isValidHeight() && p.isValidEyeColor() && p.isValidHairColor() && p.isValidPid()
+}
+
+func (p passport) isValidYear(key string, min, max int) bool {
+	field, hasField := p[key]
+	if !hasField {
+		return false
+	}
+	i, err := strconv.Atoi(field)
+	if err != nil {
+		return false
+	}
+	return min <= i && i <= max
+}
+
+func (p passport) isValidEyeColor() bool {
+	color, hasColor := p["ecl"]
+	if !hasColor {
+		return false
+	}
+	for _, s := range []string{"amb", "blu", "brn", "gry", "grn", "hzl", "oth"} {
+		if s == color {
+			return true
+		}
+	}
+	return false
+}
+
+func (p passport) isValidPid() bool {
+	pid, hasPid := p["pid"]
+	if !hasPid {
+		return false
+	}
+	re := regexp.MustCompile(`^[0-9]{9}$`)
+	return re.MatchString(pid)
+}
+
+func (p passport) isValidHairColor() bool {
+	hcl, hasHcl := p["hcl"]
+	if !hasHcl {
+		return false
+	}
+	re := regexp.MustCompile(`^#[0-9a-f]{6}$`)
+	return re.MatchString(hcl)
+}
+
+func (p passport) isValidHeight() bool {
+	height, hasHeight := p["hgt"]
+	if !hasHeight {
+		return false
+	}
+	if strings.HasSuffix(height, "cm") {
+		i, err := strconv.Atoi(height[:len(height)-2])
+		if err != nil {
+			return false
+		}
+		return 150 <= i && i <= 193
+	}
+	if strings.HasSuffix(height, "in") {
+		i, err := strconv.Atoi(height[:len(height)-2])
+		if err != nil {
+			return false
+		}
+		return 59 <= i && i <= 76
+	}
+	return false
+}
 
 func main() {
 	passports := readInput()
 	fmt.Println(partOne(passports))
+	fmt.Println(partTwo(passports))
 }
 
 func partOne(passports []passport) (r int) {
 	for _, p := range passports {
 		if p.isValid() {
+			r++
+		}
+	}
+	return r
+}
+
+func partTwo(passports []passport) (r int) {
+	for _, p := range passports {
+		if p.isValid2() {
 			r++
 		}
 	}
