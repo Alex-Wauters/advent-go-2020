@@ -6,11 +6,13 @@ import (
 	"log"
 	"math"
 	"os"
+	"sort"
 )
 
 func main() {
 	passes := readInput()
 	fmt.Println(partOne(passes))
+	fmt.Println(partTwo(passes))
 }
 
 func partOne(passes []string) int {
@@ -25,6 +27,20 @@ func partOne(passes []string) int {
 		}
 	}
 	return highest
+}
+
+func partTwo(passes []string) int {
+	var seats []int
+	for _, s := range passes {
+		seats = append(seats, seatId(s))
+	}
+	sort.Ints(seats)
+	for i := 1; i < len(seats)-1; i++ {
+		if seats[i+1] != seats[i]+1 {
+			return seats[i] + 1
+		}
+	}
+	panic("Could not find seat")
 }
 
 func seatId(s string) int {
