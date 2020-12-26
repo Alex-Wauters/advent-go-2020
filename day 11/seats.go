@@ -10,10 +10,11 @@ import (
 
 func main() {
 	lines := readInput()
-	partOne(lines)
+	occupied(lines, nextChar1)
+	occupied(lines, nextChar2)
 }
 
-func partOne(lines []string) {
+func occupied(lines []string, nextChar func([]string, int, int) rune) {
 	previous := lines
 	for true {
 		changed := make([]string, 0)
@@ -36,7 +37,7 @@ func partOne(lines []string) {
 	}
 }
 
-func nextChar(lines []string, row, col int) rune {
+func nextChar1(lines []string, row, col int) rune {
 	currChar := lines[row][col]
 	if currChar == '.' {
 		return '.'
@@ -55,6 +56,41 @@ func nextChar(lines []string, row, col int) rune {
 		return '#'
 	}
 	if currChar == '#' && numAdjacent >= 4 {
+		return 'L'
+	}
+	return rune(currChar)
+}
+
+func isOccupiedInDir(lines []string, row, col, deltaRow, deltaCol int) bool {
+	if (deltaCol == 0 && deltaRow == 0) || (col+deltaCol) < 0 || (col+deltaCol) >= len(lines[row]) || (row+deltaRow) < 0 || (row+deltaRow) >= len(lines) {
+		return false
+	}
+	if lines[row+deltaRow][col+deltaCol] == '#' {
+		return true
+	}
+	if lines[row+deltaRow][col+deltaCol] == 'L' {
+		return false
+	}
+	return isOccupiedInDir(lines, row+deltaRow, col+deltaCol, deltaRow, deltaCol)
+}
+
+func nextChar2(lines []string, row, col int) rune {
+	currChar := lines[row][col]
+	if currChar == '.' {
+		return '.'
+	}
+	numAdjacent := 0
+	for _, deltaRow := range []int{-1, 0, 1} {
+		for _, deltaCol := range []int{-1, 0, 1} {
+			if isOccupiedInDir(lines, row, col, deltaRow, deltaCol) {
+				numAdjacent++
+			}
+		}
+	}
+	if currChar == 'L' && numAdjacent == 0 {
+		return '#'
+	}
+	if currChar == '#' && numAdjacent >= 5 {
 		return 'L'
 	}
 	return rune(currChar)
